@@ -15,7 +15,8 @@
 
 ## Examples for Basic Rules
 ### Valid Move Input
-![Example1](assets/example1.png)
+<img src = "assets/example1.png" style="width: 400px;"/>
+
 In this example, clicking the rook on d1 and moving it to d8 would be a valid move input. This does not mean that the rook will end up on d8 after the move. However, the move will go through and where the rook ends up will depend on which pawns being real/buffed. 
 
 ### Making a Bluff Move 
@@ -34,7 +35,7 @@ the game by bluffing the move e4. Now, the bluffed pawn on e4 is binded with the
   - Only real pieces can stop a real piece's movement.
 
 ## Examples of Captures
-### Example 1
+### Multiple Captures 
 <table><tr>
 <td> <img src="assets/example5.png"  style="width: 400px;"/> </td>
 <td> <img src="assets/example4.png"  style="width: 400px;"/> </td>
