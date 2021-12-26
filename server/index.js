@@ -21,4 +21,7 @@ server.listen(3001, () => {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
+  socket.on("square", (square) => {
+    io.emit("changeColor", square);
+  });
 });
