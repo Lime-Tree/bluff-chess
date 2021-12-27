@@ -11,6 +11,8 @@ const io = require("socket.io")(server, {
   },
 });
 
+let roomCounter = 0;
+
 app.get("/", (req, res) => {
   res.send("<h1>Hello world</h1>");
 });
@@ -20,8 +22,23 @@ server.listen(3001, () => {
 });
 
 io.on("connection", (socket) => {
+  let room;
+
+  socket.on("joinRoom", (roomNumber) => {
+    room = roomNumber;
+    socket.join(room);
+  });
+
+  socket.on("createRoom", () => {
+    room = roomCounter;
+    socket.join(room);
+    socket.emit("getRoomNumber", room);
+    roomCounter += 1;
+  });
+
   console.log("a user connected");
+
   socket.on("square", (square) => {
-    io.emit("changeColor", square);
+    io.to(room).emit("changeColor", square);
   });
 });

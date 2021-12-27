@@ -11,7 +11,6 @@ const Board = ({ socket }) => {
         ...prevStyles,
         [square]: { backgroundColor: "blue" },
       }));
-      console.log(styleSquares);
     });
   }, []);
 
