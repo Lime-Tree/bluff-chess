@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Lobby = ({ socket }) => {
-  const [roomNumber, setRoomNumber] = useState(0);
+  let navigate = useNavigate();
+  const [roomNumber, setRoomNumber] = useState("0");
 
   useEffect(() => {
     socket.on("getRoomNumber", (roomNumber) => {
       setRoomNumber(roomNumber);
+      navigate("./board");
     });
   }, []);
 
@@ -17,8 +20,8 @@ const Lobby = ({ socket }) => {
     setRoomNumber(target.value);
   };
 
-  const joinRoom = (e) => {
-    e.preventDefault();
+  const joinRoom = (event) => {
+    event.preventDefault();
     socket.emit("joinRoom", roomNumber);
   };
 
