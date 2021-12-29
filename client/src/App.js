@@ -2,7 +2,7 @@ import "./App.css";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { io } from "socket.io-client";
-import Board from "./Chessboard";
+import Board from "./Board";
 import Lobby from "./Lobby";
 
 const socket = io("http://localhost:3001", {

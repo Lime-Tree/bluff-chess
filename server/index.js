@@ -31,25 +31,23 @@ io.on("connection", (socket) => {
     if (roomMap[joinedRoomNumber]) {
       roomNumber = joinedRoomNumber;
       socket.join(roomNumber);
-      socket.emit("getRoomNumber", roomNumber);
+      socket.emit("roomJoined", roomNumber);
+      console.log(roomNumber);
       room = roomMap[roomNumber];
     }
+  });
+
+  socket.on("getRoomNumber", () => {
+    socket.emit("roomNumber", roomNumber);
   });
 
   socket.on("createRoom", () => {
     roomNumber = roomCounter.toString();
     socket.join(roomNumber);
-    socket.emit("getRoomNumber", roomNumber);
-    console.log(roomNumber);
+    socket.emit("roomJoined", roomNumber);
     room = { game: new Chess() };
     roomMap[roomNumber] = room;
     roomCounter += 1;
-  });
-
-  console.log("a user connected");
-
-  socket.on("square", (square) => {
-    io.to(roomNumber).emit("changeColor", square);
   });
 
   socket.on("move", ({ from, to }) => {
@@ -58,11 +56,8 @@ io.on("connection", (socket) => {
       to: to,
       promotion: "q",
     });
-    console.log(move);
-    if (!move) {
-      return;
+    if (move) {
+      io.to(roomNumber).emit("updateBoard", room.game.fen());
     }
-    io.to(roomNumber).emit("updateBoard", room.game.fen());
-    console.log(room.game.fen());
   });
 });

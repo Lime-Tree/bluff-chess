@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Lobby = ({ socket }) => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const [roomNumber, setRoomNumber] = useState("0");
 
   useEffect(() => {
-    socket.on("getRoomNumber", (roomNumber) => {
-      setRoomNumber(roomNumber);
+    socket.on("roomJoined", () => {
       navigate("./board");
     });
   }, []);

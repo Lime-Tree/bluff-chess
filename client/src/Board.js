@@ -4,29 +4,24 @@ import Chessboard from "chessboardjsx";
 const Board = ({ socket }) => {
   const [styleSquares, setStyleSquares] = useState({});
   const [position, setPosition] = useState("start");
-  const [roomNumber, setRoomNumber] = useState(0);
+  const [roomNumber, setRoomNumber] = useState("0");
   const [pieceSquare, setPieceSquare] = useState("");
 
   useEffect(() => {
-    socket.on("changeColor", (square) => {
-      setStyleSquares((prevStyles) => ({
-        ...prevStyles,
-        [square]: { backgroundColor: "blue" },
-      }));
-    });
-
     socket.on("updateBoard", (position) => {
       setPosition(position);
       setPieceSquare("");
     });
 
-    socket.on("getRoomNumber", (room) => {
+    socket.on("roomNumber", (room) => {
       setRoomNumber(room);
+      console.log("room: " + room);
     });
+
+    socket.emit("getRoomNumber");
   }, []);
 
   const handleSquareClick = (square) => {
-    // socket.emit("square", square);
     socket.emit("move", { from: pieceSquare, to: square });
     setPieceSquare(square);
   };
