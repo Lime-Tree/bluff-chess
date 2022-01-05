@@ -16,8 +16,8 @@ const BluffChess = require("./BluffChess");
 bluffChess = new BluffChess();
 
 let roomCounter = 0;
+let player = 0;
 const roomMap = new Map();
-
 app.get("/", (req, res) => {
   res.send("<h1>Hello world</h1>");
 });
@@ -29,6 +29,7 @@ server.listen(3001, () => {
 io.on("connection", (socket) => {
   let roomNumber;
   let room;
+  let playerColor;
 
   socket.on("joinRoom", (joinedRoomNumber) => {
     if (roomMap[joinedRoomNumber]) {
@@ -37,6 +38,8 @@ io.on("connection", (socket) => {
       socket.emit("roomJoined", roomNumber);
       console.log(roomNumber);
       room = roomMap[roomNumber];
+      playerColor = player === 0 ? "white" : "black";
+      player = (player + 1) % 2;
     }
   });
 
@@ -51,6 +54,9 @@ io.on("connection", (socket) => {
     room = { game: new Chess() };
     roomMap[roomNumber] = room;
     roomCounter += 1;
+
+    playerColor = player === 0 ? "white" : "black";
+    player = (player + 1) % 2;
   });
 
   /*socket.on("move", ({ from, to }) => {
@@ -65,49 +71,52 @@ io.on("connection", (socket) => {
   }); */
 
   socket.on("move", ({ from, to }) => {
-    const move = bluffChess.move(from, to);
+    let move;
+    if (playerColor === bluffChess.turn) {
+      move = bluffChess.move(from, to);
+    }
     if (move) {
-      //console.log(bluffChess.getPosition());
-      var position = JSON.parse(JSON.stringify(bluffChess.getPosition()));
+      io.to(roomNumber).emit("updateBoard", {
+        positions: bluffChess.renderPosition,
+        bluffs: bluffChess.bluffBinds,
+      });
+      bluffChess.changeTurn();
+      io.to(roomNumber).emit("turn", bluffChess.turn);
+    }
+  });
 
-      const thing = {
-        a8: "bR",
-        b8: "bN",
-        c8: "bB",
-        d8: "bQ",
-        e8: "bK",
-        f8: "bB",
-        g8: "bN",
-        h8: "bR",
-        a7: "bP",
-        b7: "bP",
-        a1: "wR",
-        a2: "wP",
-        b2: "wP",
-        c1: "wB",
-        c2: "wP",
-        c7: "bP",
-        d1: "wQ",
-        d2: "wP",
-        d7: "bP",
-        e1: "wK",
-        e2: "wP",
-        g1: "wN",
-        e7: "bP",
-        b1: "wN",
-        f2: "wP",
-        f7: "bP",
-        g2: "wB",
-        g7: "bP",
-        h1: "wR",
-        h2: "wP",
-        h7: "bP",
-        poop: "helloeric",
-      };
+  socket.on("getPlayerColor", () => {
+    socket.emit("playerColor", playerColor);
+  });
 
-      console.log(thing);
+  socket.on("getStyleBluffs", () => {
+    const styleSquares = {};
 
-      io.to(roomNumber).emit("updateBoard", thing);
+    Object.entries(bluffChess.bluffBinds).forEach(([key, value]) => {
+      if (bluffChess.pieceColor(key) === playerColor) {
+        styleSquares[key] = { backgroundColor: "orange" };
+      }
+    });
+    socket.emit("styleBluffs", styleSquares);
+  });
+
+  socket.on("createBluffedPiece", ({ from, to }) => {
+    //check if real piece
+    if (bluffChess.bluffBinds.hasOwnProperty(from)) {
+      return null;
+    }
+
+    let move;
+    if (playerColor === bluffChess.turn) {
+      move = bluffChess.createBluffedPiece(from, to);
+    }
+    if (move) {
+      io.to(roomNumber).emit("updateBoard", {
+        positions: bluffChess.renderPosition,
+        bluffs: bluffChess.bluffBinds,
+      });
+      bluffChess.changeTurn();
+      io.to(roomNumber).emit("turn", bluffChess.turn);
     }
   });
 });
