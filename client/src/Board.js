@@ -28,6 +28,7 @@ const Board = ({ socket }) => {
       });
       setPieceSquare("");
     });
+
     socket.on("roomNumber", (roomNumber) => {
       socket.emit("getPlayerColor");
       socket.on("playerColor", (playerColor) => {
@@ -35,6 +36,7 @@ const Board = ({ socket }) => {
       });
       setRoomNumber(roomNumber);
     });
+
     socket.emit("getRoomNumber");
   }, [socket]);
 

@@ -17,10 +17,7 @@ bluffChess = new BluffChess();
 
 let roomCounter = 0;
 let player = 0;
-const roomMap = new Map();
-app.get("/", (req, res) => {
-  res.send("<h1>Hello world</h1>");
-});
+const roomMap = {};
 
 server.listen(3001, () => {
   console.log("listening on *:3001");
@@ -31,6 +28,19 @@ io.on("connection", (socket) => {
   let room;
   let playerColor;
 
+  socket.on("createRoom", () => {
+    roomNumber = roomCounter.toString();
+    socket.join(roomNumber);
+    socket.emit("roomJoined", roomNumber);
+
+    room = { game: new Chess() };
+    roomMap[roomNumber] = room;
+    roomCounter += 1;
+    playerColor = player === 0 ? "white" : "black";
+    player = (player + 1) % 2;
+    io.emit("createdRoom", Object.keys(roomMap));
+  });
+
   socket.on("joinRoom", (joinedRoomNumber) => {
     if (roomMap[joinedRoomNumber]) {
       roomNumber = joinedRoomNumber;
@@ -40,6 +50,8 @@ io.on("connection", (socket) => {
       room = roomMap[roomNumber];
       playerColor = player === 0 ? "white" : "black";
       player = (player + 1) % 2;
+    } else {
+      socket.emit("roomNotExist");
     }
   });
 
@@ -47,28 +59,9 @@ io.on("connection", (socket) => {
     socket.emit("roomNumber", roomNumber);
   });
 
-  socket.on("createRoom", () => {
-    roomNumber = roomCounter.toString();
-    socket.join(roomNumber);
-    socket.emit("roomJoined", roomNumber);
-    room = { game: new Chess() };
-    roomMap[roomNumber] = room;
-    roomCounter += 1;
-
-    playerColor = player === 0 ? "white" : "black";
-    player = (player + 1) % 2;
+  socket.on("startGame", () => {
+    io.to(roomNumber).emit("enterGame");
   });
-
-  /*socket.on("move", ({ from, to }) => {
-    const move = room.game.move({
-      from: from,
-      to: to,
-      promotion: "q",
-    });
-    if (move) {
-      io.to(roomNumber).emit("updateBoard", room.game.fen());
-    }
-  }); */
 
   socket.on("move", ({ from, to }) => {
     let move;
