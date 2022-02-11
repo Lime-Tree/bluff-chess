@@ -278,7 +278,6 @@ module.exports = class BluffChess {
           move.square = "";
           break;
         default:
-          console.log({ from: from, to: to });
           move.square = moveInfo.to;
           break;
       }
