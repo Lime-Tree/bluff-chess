@@ -125,6 +125,11 @@ module.exports = class BluffChess {
         move = null;
         return false;
       } else if (this.pieceColor(square) === moveInfo.enemyColor) {
+        if (this.bluffBinds.hasOwnProperty(square)) {
+          move.delete.push(square);
+          move.square = square;
+          return true;
+        }
         move.delete.push(moveInfo.from);
         return false;
       } else {
@@ -273,6 +278,7 @@ module.exports = class BluffChess {
           move.square = "";
           break;
         default:
+          console.log({ from: from, to: to });
           move.square = moveInfo.to;
           break;
       }
@@ -598,6 +604,7 @@ module.exports = class BluffChess {
     this.changePosition(to, this.position[from], "all");
     if (this.bluffBinds.hasOwnProperty(from)) {
       const realPiece = this.bluffBinds[from];
+      delete this.bluffBinds[from];
       this.deletePiece(from);
       this.bluffBinds[to] = realPiece;
     } else {
